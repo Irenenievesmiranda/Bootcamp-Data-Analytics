@@ -2,16 +2,19 @@ use transactions;
 -- NIVEL 1:
 -- Ejercicio 2: Utilizando JOIN realizarás las siguientes consultas:
 # a) Listado de los países que están realizando compras.
-SELECT DISTINCT country FROM company;
+SELECT DISTINCT country FROM company
+WHERE declined = 0;
 
 # b) Desde cuántos países se realizan las compras.
-SELECT COUNT(DISTINCT country) FROM company;
+SELECT COUNT(DISTINCT country) FROM company
+WHERE declined = 0;
 
 # c) Identifica a la compañía con la mayor media de ventas.
 SELECT t.company_id, c.company_name, AVG(t.amount) AS media_ventas
 FROM transaction t
 JOIN company c
 ON t.company_id = c.company_id 
+WHERE declined = 0
 GROUP BY company_id, company_name
 ORDER BY media_ventas DESC
 LIMIT 1;
@@ -23,8 +26,7 @@ FROM transaction
 WHERE company_id IN (
 	SELECT company_id 
     FROM company
-    WHERE country = 'Germany'
-);
+    WHERE country = 'Germany');
 
 # b)Lista las empresas que han realizado transacciones por un amount superior a la media de todas las transacciones.
 SELECT company_name
@@ -35,7 +37,8 @@ WHERE company_id IN (
     where amount > (
 		Select 
 		AVG(amount)
-        FROM transaction));
+        FROM transaction
+        WHERE declined = 0));
 
 # c)Eliminarán del sistema las empresas que carecen de transacciones registradas, entrega el listado de estas empresas.
 select company_name
@@ -48,9 +51,10 @@ from transaction);
 -- NIVEL 2:
 # Ejercicio 1: Identifica los cinco días que se generó la mayor cantidad de ingresos en la empresa por ventas. 
 # Muestra la fecha de cada transacción junto con el total de las ventas.
-SELECT timestamp, SUM(amount) AS Total_dia
+SELECT DATE(timestamp), SUM(amount) AS Total_dia
 FROM transaction
-GROUP BY timestamp
+WHERE declined = 0
+GROUP BY DATE(timestamp)
 ORDER BY Total_dia DESC
 LIMIT 5;
 
@@ -59,7 +63,9 @@ SELECT c.country, ROUND(AVG(t.amount),2) AS Media_ventas
 FROM company c
 JOIN transaction t
 ON c.company_id = t.company_id
-GROUP BY c.country;
+WHERE declined = 0
+GROUP BY c.country
+ORDER BY Media_ventas DESC;
 
 # Ejercicio 3: En tu empresa, se plantea un nuevo proyecto para lanzar algunas campañas publicitarias para hacer competencia a la compañía “Non Institute”. 
 # Para ello, te piden la lista de todas las transacciones realizadas por empresas que están ubicadas en el mismo país que esta compañía.
@@ -92,6 +98,7 @@ FROM company c
 JOIN transaction t
 ON c.company_id = t.company_id
 WHERE t.amount between 100 and 200
+AND declined = 0
 HAVING fecha_formateada IN ('29/04/2021', '20/07/2021', '13/03/2022')
 order by t.amount DESC;
 
